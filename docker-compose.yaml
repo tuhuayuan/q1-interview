@@ -1,0 +1,35 @@
+version: "3"
+services:
+  redis:
+    image: redis:7
+    hostname: q1-redis
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    networks:
+      - q1_network
+  scheduler:
+    build:
+      context: .
+    image: q1
+    tty: true
+    environment:
+      REDIS_URL: redis://q1-redis:6379/0
+    command:
+      - python
+      - q1_scheduler.py
+    networks:
+      - q1_network
+  api:
+    build:
+      context: .
+    image: q1
+    hostname: q1-api
+    tty: true
+    ports:
+      - 8000:8000
+    environment:
+      REDIS_URL: redis://q1-redis:6379/0
+    networks:
+      - q1_network
+networks:
+  q1_network:
